@@ -1,0 +1,1 @@
+INSERT INTO usergroup (id, name) values (1, 'admin');

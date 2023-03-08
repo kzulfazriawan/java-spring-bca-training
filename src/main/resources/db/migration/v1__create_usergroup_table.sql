@@ -1,0 +1,6 @@
+CREATE TABLE tests
+(
+  id BIGSERIAL NOT NULL PRIMARY KEY,
+  name varchar(199) NOT NULL,
+  users BIGSERIAL NOT NULL,
+);
