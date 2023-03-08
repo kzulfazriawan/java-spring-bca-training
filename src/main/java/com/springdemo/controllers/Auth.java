@@ -4,6 +4,8 @@ import com.springdemo.dto.RequestData;
 import com.springdemo.dto.ResponseData;
 import com.springdemo.dto.UserDto;
 import com.springdemo.entities.User;
+import com.springdemo.exceptions.parts.CustomDuplicateError;
+import com.springdemo.exceptions.parts.CustomNotFoundException;
 import com.springdemo.services.AuthServiceInterface;
 import com.springdemo.services.UserService;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RestController
@@ -30,12 +33,13 @@ public class Auth {
     private AuthServiceInterface authServiceInterface;
 
     @PostMapping("/auth/register")
-    public ResponseEntity<String> register(@Valid @RequestBody UserDto userDto, BindingResult result) {
+    public ResponseEntity<String> register(@Valid @RequestBody UserDto userDto, BindingResult result) throws CustomDuplicateError{
         // get existing email from user
         User user = this.userService.findUserByEmail(userDto.getEmail());
 
         if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
             result.rejectValue("email", null, "Email is already taken");
+            throw new CustomDuplicateError("Email udah kepake bang!");
         }
 
         this.userService.save(userDto);
@@ -55,12 +59,15 @@ public class Auth {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id, @Valid @RequestBody UserDto userDto, BindingResult result){
+    public ResponseEntity<String> update(@PathVariable Long id, @Valid @RequestBody UserDto userDto, BindingResult result) throws CustomNotFoundException {
         // cari user existing berdasarkan id
-        User user = this.userService.findById(id);
-        if (user == null) {
+        try {
+            User user = this.userService.findById(id);
+        } catch (NoSuchElementException e){
             result.rejectValue("id", null, "Id is not exists");
+            throw new CustomNotFoundException("Ga ada datanya bang!");
         }
+
         this.userService.update(id, userDto);
         return ResponseEntity.status(HttpStatus.OK).body("User " + userDto.getName() + " successfully update");
     }
