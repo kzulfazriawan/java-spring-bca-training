@@ -42,6 +42,21 @@ public class UserService implements UserServiceInterface {
         return userRepository.findByUsername(username);
     }
 
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id).get();
+    }
+
+    @Override
+    public void update(Long id, UserDto userDto) {
+        User user = userRepository.findById(id).get();
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        userRepository.save(user);
+    }
+
     private UserDto convertEntityToDto(User user){
         UserDto userDto = new UserDto();
         userDto.setName(user.getName());

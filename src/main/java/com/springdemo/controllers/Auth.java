@@ -44,4 +44,14 @@ public class Auth {
     }
 
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> update(@PathVariable Long id, @Valid @RequestBody UserDto userDto, BindingResult result){
+        // cari user existing berdasarkan id
+        User user = this.userService.findById(id);
+        if (user == null) {
+            result.rejectValue("id", null, "Id is not exists");
+        }
+        this.userService.update(id, userDto);
+        return ResponseEntity.status(HttpStatus.OK).body("User " + userDto.getName() + " successfully update");
+    }
 }

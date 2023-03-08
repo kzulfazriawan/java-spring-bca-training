@@ -12,5 +12,9 @@ public interface UserServiceInterface {
 
     User findUserByUsername(String username);
 
+    User findById(Long id);
+
+    void update(Long id, UserDto userDto);
+
     List<UserDto> showAll();
 }
