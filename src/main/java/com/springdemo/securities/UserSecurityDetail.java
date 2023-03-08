@@ -34,9 +34,13 @@ public class UserSecurityDetail implements UserDetailsService {
         User user = userRepository.findByEmail(email);
 
         if (user != null) {
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), this.mapUserGroupToAuth(user.getGroups()));
+            return UserSecurityDetailAuth.generate(user, "USER");
+            // Un-comment kalo pake basic auth
+            // return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), this.mapUserGroupToAuth(user.getGroups()));
         } else {
             throw new UsernameNotFoundException("Credentials are mismatch");
         }
     }
+
+
 }

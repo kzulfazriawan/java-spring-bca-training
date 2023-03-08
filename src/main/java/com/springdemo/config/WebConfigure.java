@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -40,6 +42,16 @@ public class WebConfigure {
     }
 
     @Bean
+    public JWTTokenFilter jwtTokenFilter() {
+        return new JWTTokenFilter();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Enable CORS and disable CSRF
         http = http.cors().and().csrf().disable();
@@ -51,15 +63,24 @@ public class WebConfigure {
         http = http.exceptionHandling().authenticationEntryPoint(authenticationEntryPointConfig).and();
 
         // Endpoints permition
+        /*
+         * Un-comment kalo pake basic authentication
         http.authorizeHttpRequests().requestMatchers("/").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .anyRequest().authenticated().and().httpBasic();
+         */
+
+        http.authorizeHttpRequests().requestMatchers("/").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                .anyRequest().authenticated();
 
         // Set authentication provider
         http.authenticationProvider(authenticationProvider());
 
         // Set authentication filter
-        http.addFilterBefore(new CorsConfig(), BasicAuthenticationFilter.class);
+        // Un-comment kalo pake basic authentication
+        // http.addFilterBefore(new CorsConfig(), BasicAuthenticationFilter.class);
+        http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

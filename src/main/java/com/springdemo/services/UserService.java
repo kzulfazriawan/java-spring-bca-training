@@ -21,6 +21,7 @@ public class UserService implements UserServiceInterface {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
     @Override
     public void save(UserDto userDto) {
         User user = new User();

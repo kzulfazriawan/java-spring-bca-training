@@ -1,7 +1,10 @@
 package com.springdemo.controllers;
 
+import com.springdemo.dto.RequestData;
+import com.springdemo.dto.ResponseData;
 import com.springdemo.dto.UserDto;
 import com.springdemo.entities.User;
+import com.springdemo.services.AuthServiceInterface;
 import com.springdemo.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,9 @@ public class Auth {
         this.userService = userService;
     }
 
+    @Autowired
+    private AuthServiceInterface authServiceInterface;
+
     @PostMapping("/auth/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserDto userDto, BindingResult result) {
         // get existing email from user
@@ -37,12 +43,16 @@ public class Auth {
         return ResponseEntity.status(HttpStatus.CREATED).body("User " + userDto.getName() + " successfully created");
     }
 
+    @PostMapping("/auth/login")
+    public ResponseEntity<?> login(@Valid @RequestBody RequestData requestData) throws Exception{
+        ResponseData responseData = authServiceInterface.login(requestData);
+        return ResponseEntity.status(responseData.getStatus()).body(responseData);
+    }
 
     @GetMapping("/shows")
     public ResponseEntity<List<UserDto>> shows(){
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.showAll());
     }
-
 
     @PutMapping("/update/{id}")
     public ResponseEntity<String> update(@PathVariable Long id, @Valid @RequestBody UserDto userDto, BindingResult result){
